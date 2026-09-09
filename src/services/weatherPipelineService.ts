@@ -263,8 +263,9 @@ export async function processWeatherQuery(
   if (parsed.requiresAlerts) {
     alertCtx = await getAlertsForLocation(targetLocation);
   }
-
-  const shouldRunDecision = parsed.requiresDecision || parsed.extractedEntities.hasExplicitActivity || (mergedContext.isFollowUp && !!mergedContext.activity);
+const shouldRunDecision =
+  parsed.requiresDecision ||
+  parsed.extractedEntities.hasExplicitActivity;
 
   if (shouldRunDecision) {
     if (!alertCtx) {
