@@ -9,13 +9,11 @@ import {
   X,
   Search,
   CheckCircle,
-  TrendingDown,
-  ShieldAlert,
-  Compass
+  TrendingDown
 } from 'lucide-react';
 import { LocationSearchResult } from '../../services/weatherProviders/openMeteoProvider';
 import { searchLocations, fetchWeatherForCurrentLocation } from '../../services/weatherService';
-import { ACTIVITIES_CONFIG, ActivityId, ActivityConfig } from '../../config/activityConfig';
+import { ACTIVITIES_CONFIG, ActivityId } from '../../config/activityConfig';
 import { analyzeWeatherDecision, DecisionResult } from '../../services/decisionService';
 import './DecisionCard.css';
 
@@ -25,7 +23,13 @@ interface DecisionCardProps {
   isLoading?: boolean;
 }
 
-const POPULAR_LOCATIONS: Array<{ name: string; admin1: string; country: string; latitude: number; longitude: number }> = [
+const POPULAR_LOCATIONS: Array<{
+  name: string;
+  admin1: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+}> = [
   { name: 'Chennai', admin1: 'Tamil Nadu', country: 'India', latitude: 13.0827, longitude: 80.2707 },
   { name: 'Hyderabad', admin1: 'Telangana', country: 'India', latitude: 17.385, longitude: 78.4867 },
   { name: 'Bengaluru', admin1: 'Karnataka', country: 'India', latitude: 12.9716, longitude: 77.5946 },
@@ -38,7 +42,6 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
   initialLocation,
   isLoading = false
 }) => {
-  // Location State
   const [selectedLocation, setSelectedLocation] = useState<LocationSearchResult | null>(
     initialLocation || {
       id: 1,
@@ -50,26 +53,23 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
       timezone: 'Asia/Kolkata'
     }
   );
+
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<LocationSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  // Form State
   const [selectedActivityKey, setSelectedActivityKey] = useState<ActivityId>('cricket');
   const [selectedDate, setSelectedDate] = useState('Today');
   const [selectedTime, setSelectedTime] = useState('Evening');
 
-  // Result State
   const [result, setResult] = useState<DecisionResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const requestIdRef = useRef(0);
 
-  // Synchronize initial location changes only when location coordinates or name actually change significantly (> 5km)
   useEffect(() => {
     if (initialLocation) {
       setSelectedLocation((prevLoc) => {
@@ -78,17 +78,15 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           Math.abs(prevLoc.latitude - initialLocation.latitude) < 0.05 &&
           Math.abs(prevLoc.longitude - initialLocation.longitude) < 0.05
         ) {
-          // Location is equivalent (within ~5km), do not clear result or reset location state
           return prevLoc;
         }
-        // Location actually changed to a new city/coordinates, so update location & clear stale result
+
         setResult(null);
         return initialLocation;
       });
     }
   }, [initialLocation?.latitude, initialLocation?.longitude, initialLocation?.name]);
 
-  // Handle Autocomplete Search with Debounce & Cache
   const handleQueryChange = (text: string) => {
     setSearchQuery(text);
     setSearchError(null);
@@ -104,10 +102,12 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
     }
 
     setIsSearching(true);
+
     debounceTimerRef.current = setTimeout(async () => {
       try {
         const results = await searchLocations(text.trim());
         setSuggestions(results);
+
         if (results.length === 0) {
           setSearchError('Location not found. Try another city or location.');
         }
@@ -125,7 +125,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
     setSearchQuery('');
     setSuggestions([]);
     setSearchError(null);
-    setResult(null); // STALE DATA PREVENTION
+    setResult(null);
   };
 
   const handleClearLocation = () => {
@@ -133,16 +133,17 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
     setSearchQuery('');
     setSuggestions([]);
     setSearchError(null);
-    setResult(null); // STALE DATA PREVENTION
+    setResult(null);
   };
 
   const handleUseCurrentLocation = async () => {
     setIsSearching(true);
     setSearchError(null);
+
     try {
       const weatherCtx = await fetchWeatherForCurrentLocation();
       setSelectedLocation(weatherCtx.location);
-      setResult(null); // STALE DATA PREVENTION
+      setResult(null);
     } catch (err: any) {
       setSearchError('Location access was denied. Search for a location manually.');
     } finally {
@@ -152,31 +153,31 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
 
   const handleActivityChange = (actKey: ActivityId) => {
     setSelectedActivityKey(actKey);
-    setResult(null); // STALE DATA PREVENTION
+    setResult(null);
   };
 
   const handleDateChange = (d: string) => {
     setSelectedDate(d);
-    setResult(null); // STALE DATA PREVENTION
+    setResult(null);
   };
 
   const handleTimeChange = (t: string) => {
     setSelectedTime(t);
-    setResult(null); // STALE DATA PREVENTION
+    setResult(null);
   };
 
-  // Run Deterministic Decision Engine Analysis
   const handleAnalyzeClick = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!selectedLocation) {
       setSearchError('Please select or search a location first.');
       return;
     }
 
     const currentRequestId = ++requestIdRef.current;
+
     setAnalyzing(true);
     setAnalysisError(null);
-
 
     try {
       const res = await analyzeWeatherDecision(
@@ -186,20 +187,23 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
         selectedTime
       );
 
-      // Race condition guard: ignore response if a newer request was dispatched
       if (currentRequestId !== requestIdRef.current) {
         console.warn('[RiskAnalyzer] Stale request ignored:', currentRequestId);
         return;
       }
 
       setResult(res);
+
       if (onAnalyze) {
         onAnalyze(selectedActivityKey, selectedLocation, selectedTime);
       }
     } catch (err: any) {
       if (currentRequestId !== requestIdRef.current) return;
-      console.error("RISK ANALYSIS ERROR:", err);
-      setAnalysisError(err?.message || 'Unable to analyze weather risk. Please try again.');
+
+      console.error('RISK ANALYSIS ERROR:', err);
+      setAnalysisError(
+        err?.message || 'Unable to analyze weather risk. Please try again.'
+      );
     } finally {
       if (currentRequestId === requestIdRef.current) {
         setAnalyzing(false);
@@ -228,23 +232,31 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
         <h3 className="section-title">
           <Sliders size={20} className="icon-cyan" /> Interactive Activity Risk Analyzer
         </h3>
-        <span className="badge badge-ai">Deterministic Risk Engine</span>
+
+        <span className="badge badge-ai">
+          Deterministic Risk Engine
+        </span>
       </div>
 
       <p className="decision-subtitle">
         Configure any location, date, time window, and activity to compute an evidence-grounded weather risk score and actionable recommendation.
       </p>
 
-      {/* Inputs Form */}
       <form onSubmit={handleAnalyzeClick} className="decision-form-grid">
+
         {/* 1. Location Search & Selector */}
         <div className="form-group-full">
           <div className="form-label-row">
             <label className="form-label">
               <MapPin size={14} className="icon-cyan" /> Location:
             </label>
+
             {selectedLocation && (
-              <button type="button" className="btn-text-clear" onClick={handleClearLocation}>
+              <button
+                type="button"
+                className="btn-text-clear"
+                onClick={handleClearLocation}
+              >
                 <X size={12} /> Clear Location
               </button>
             )}
@@ -254,15 +266,22 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
             <div className="selected-location-display-box">
               <span className="location-name-text">
                 📍 {selectedLocation.name}
-                {selectedLocation.admin1 ? `, ${selectedLocation.admin1}` : ''}, {selectedLocation.country}
+                {selectedLocation.admin1 ? `, ${selectedLocation.admin1}` : ''}
+                , {selectedLocation.country}
               </span>
-              <button type="button" className="btn-change-loc" onClick={handleClearLocation}>
+
+              <button
+                type="button"
+                className="btn-change-loc"
+                onClick={handleClearLocation}
+              >
                 Change City
               </button>
             </div>
           ) : (
             <div className="location-search-input-wrapper">
               <Search size={16} className="search-icon" />
+
               <input
                 type="text"
                 className="input-field search-location-field"
@@ -270,13 +289,17 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
                 value={searchQuery}
                 onChange={(e) => handleQueryChange(e.target.value)}
               />
+
               {searchQuery && (
-                <button type="button" className="btn-clear-search" onClick={() => handleQueryChange('')}>
+                <button
+                  type="button"
+                  className="btn-clear-search"
+                  onClick={() => handleQueryChange('')}
+                >
                   <X size={14} />
                 </button>
               )}
 
-              {/* Autocomplete Dropdown */}
               {suggestions.length > 0 && (
                 <ul className="search-suggestions-dropdown glass-card">
                   {suggestions.map((loc) => (
@@ -286,9 +309,11 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
                       className="suggestion-item"
                     >
                       <MapPin size={14} className="icon-cyan" />
+
                       <span>
                         <strong>{loc.name}</strong>
-                        {loc.admin1 ? `, ${loc.admin1}` : ''}, {loc.country}
+                        {loc.admin1 ? `, ${loc.admin1}` : ''}
+                        , {loc.country}
                       </span>
                     </li>
                   ))}
@@ -297,7 +322,6 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
             </div>
           )}
 
-          {/* Quick Actions & Popular Locations */}
           <div className="quick-locations-row">
             <button
               type="button"
@@ -307,13 +331,21 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
             >
               <MapPin size={13} className="icon-emerald" /> 📍 Use Current Location
             </button>
+
             <span className="popular-label">Popular:</span>
+
             {POPULAR_LOCATIONS.map((pop) => (
               <button
                 type="button"
                 key={pop.name}
                 className="pill-popular-city"
-                onClick={() => handleSelectLocationItem({ ...pop, id: Date.now(), timezone: 'Asia/Kolkata' })}
+                onClick={() =>
+                  handleSelectLocationItem({
+                    ...pop,
+                    id: Date.now(),
+                    timezone: 'Asia/Kolkata'
+                  })
+                }
               >
                 {pop.name}
               </button>
@@ -322,7 +354,8 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
 
           {searchError && (
             <div className="form-error-toast">
-              <AlertCircle size={13} /> <span>{searchError}</span>
+              <AlertCircle size={13} />
+              <span>{searchError}</span>
             </div>
           )}
         </div>
@@ -332,13 +365,17 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           <label className="form-label">
             <Sparkles size={14} className="icon-cyan" /> Activity:
           </label>
+
           <select
             className="input-field select-field"
             value={selectedActivityKey}
-            onChange={(e) => handleActivityChange(e.target.value as ActivityId)}
+            onChange={(e) =>
+              handleActivityChange(e.target.value as ActivityId)
+            }
           >
             {(Object.keys(ACTIVITIES_CONFIG) as ActivityId[]).map((key) => {
               const act = ACTIVITIES_CONFIG[key];
+
               return (
                 <option key={key} value={key}>
                   {act.icon} {act.name}
@@ -353,6 +390,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           <label className="form-label">
             <Calendar size={14} className="icon-amber" /> Date:
           </label>
+
           <select
             className="input-field select-field"
             value={selectedDate}
@@ -360,7 +398,9 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           >
             <option value="Today">Today</option>
             <option value="Tomorrow">Tomorrow</option>
-            <option value="Day After Tomorrow">Day After Tomorrow</option>
+            <option value="Day After Tomorrow">
+              Day After Tomorrow
+            </option>
           </select>
         </div>
 
@@ -369,15 +409,27 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           <label className="form-label">
             <Clock size={14} className="icon-violet" /> Time:
           </label>
+
           <select
             className="input-field select-field"
             value={selectedTime}
             onChange={(e) => handleTimeChange(e.target.value)}
           >
-            <option value="Morning">Morning (8:00 AM – 11:00 AM)</option>
-            <option value="Afternoon">Afternoon (12:00 PM – 4:00 PM)</option>
-            <option value="Evening">Evening (5:00 PM – 8:00 PM)</option>
-            <option value="Night">Night (9:00 PM – 11:00 PM)</option>
+            <option value="Morning">
+              Morning (8:00 AM – 11:00 AM)
+            </option>
+
+            <option value="Afternoon">
+              Afternoon (12:00 PM – 4:00 PM)
+            </option>
+
+            <option value="Evening">
+              Evening (5:00 PM – 8:00 PM)
+            </option>
+
+            <option value="Night">
+              Night (9:00 PM – 11:00 PM)
+            </option>
           </select>
         </div>
 
@@ -386,27 +438,65 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           <button
             type="submit"
             className="btn btn-primary btn-analyze"
-            disabled={analyzing || !selectedLocation}
+            disabled={analyzing || !selectedLocation || isLoading}
           >
             <Sparkles size={16} />
-            <span>{analyzing ? 'Calculating Risk Factors...' : 'Analyze Risk'}</span>
+
+            <span>
+              {analyzing
+                ? 'Calculating Risk Factors...'
+                : 'Analyze Risk'}
+            </span>
           </button>
         </div>
       </form>
 
       {analysisError && (
-        <div className="form-error-toast" style={{ marginTop: '1rem' }}>
-          <AlertCircle size={14} /> <span>{analysisError}</span>
+        <div
+          className="form-error-toast"
+          style={{ marginTop: '1rem' }}
+        >
+          <AlertCircle size={14} />
+          <span>{analysisError}</span>
         </div>
       )}
 
-      {/* Ready to Analyze Prompt when Inputs Change / Result Cleared */}
+      {/* Ready to Analyze Prompt */}
       {!result && !analyzing && selectedLocation && (
-        <div className="ready-to-analyze-banner glass-card" style={{ marginTop: '1.25rem', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.65rem', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-          <CheckCircle size={16} className="icon-emerald" style={{ flexShrink: 0 }} />
-          <span style={{ fontSize: '0.88rem', color: 'var(--text-secondary, #cbd5e1)' }}>
-            Ready to analyze <strong>{ACTIVITIES_CONFIG[selectedActivityKey]?.name || 'Activity'}</strong> for{' '}
-            <strong>{selectedLocation.name}</strong> ({selectedDate}, {selectedTime}). Click <strong>Analyze Risk</strong> to compute live weather risk.
+        <div
+          className="ready-to-analyze-banner glass-card"
+          style={{
+            marginTop: '1.25rem',
+            padding: '0.85rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            borderRadius: '10px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
+        >
+          <CheckCircle
+            size={16}
+            className="icon-emerald"
+            style={{ flexShrink: 0 }}
+          />
+
+          {/* CHANGED: Text is now BLACK for visibility */}
+          <span
+            style={{
+              fontSize: '0.88rem',
+              color: '#000000'
+            }}
+          >
+            Ready to analyze{' '}
+            <strong>
+              {ACTIVITIES_CONFIG[selectedActivityKey]?.name || 'Activity'}
+            </strong>{' '}
+            for{' '}
+            <strong>{selectedLocation.name}</strong>{' '}
+            ({selectedDate}, {selectedTime}). Click{' '}
+            <strong>Analyze Risk</strong> to compute live weather risk.
           </span>
         </div>
       )}
@@ -414,16 +504,26 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
       {/* RESULT DISPLAY PANEL */}
       {result && (
         <div className="risk-result-display-panel glass-card">
+
           {/* Header Summary */}
           <div className="result-header-bar">
             <div className="result-loc-tag">
-              📍 <strong>Location:</strong> {result.location.name}{result.location.admin1 ? `, ${result.location.admin1}` : ''}
+              📍 <strong>Location:</strong>{' '}
+              {result.location.name}
+              {result.location.admin1
+                ? `, ${result.location.admin1}`
+                : ''}
             </div>
+
             <div className="result-act-tag">
-              {result.activity.icon} <strong>Activity:</strong> {result.activity.name}
+              {result.activity.icon}{' '}
+              <strong>Activity:</strong>{' '}
+              {result.activity.name}
             </div>
+
             <div className="result-time-tag">
-              🕐 <strong>Time:</strong> {result.dateStr}, {result.timeRange}
+              🕐 <strong>Time:</strong>{' '}
+              {result.dateStr}, {result.timeRange}
             </div>
           </div>
 
@@ -432,14 +532,27 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           {/* Risk Score Hero Box */}
           <div className="risk-score-hero">
             <div className="score-number-box">
-              <span className="score-num">{result.riskScore}</span>
-              <span className="score-denom">/ 100</span>
+              <span className="score-num">
+                {result.riskScore}
+              </span>
+
+              <span className="score-denom">
+                / 100
+              </span>
             </div>
+
             <div className="score-level-box">
-              <span className={`risk-level-badge ${getRiskLevelBadgeClass(result.riskLevel)}`}>
+              <span
+                className={`risk-level-badge ${getRiskLevelBadgeClass(
+                  result.riskLevel
+                )}`}
+              >
                 {result.riskLevel} RISK
               </span>
-              <p className="score-timestamp">Calculated live at {result.calculatedAt}</p>
+
+              <p className="score-timestamp">
+                Calculated live at {result.calculatedAt}
+              </p>
             </div>
           </div>
 
@@ -447,16 +560,26 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
 
           {/* WHY? Factor Mathematical Breakdown */}
           <div className="why-breakdown-section">
-            <h4 className="why-title">WHY THIS RISK SCORE?</h4>
+            <h4 className="why-title">
+              WHY THIS RISK SCORE?
+            </h4>
+
             <div className="factors-list">
               {result.factors.length > 0 ? (
                 result.factors.map((f) => (
-                  <div key={f.id} className="factor-row">
-                    <span className="factor-explanation">{f.explanation}</span>
+                  <div
+                    key={f.id}
+                    className="factor-row"
+                  >
+                    <span className="factor-explanation">
+                      {f.explanation}
+                    </span>
                   </div>
                 ))
               ) : (
-                <p className="no-factors-text">No significant weather risk factors detected for this period.</p>
+                <p className="no-factors-text">
+                  No significant weather risk factors detected for this period.
+                </p>
               )}
             </div>
           </div>
@@ -465,21 +588,44 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
 
           {/* RECOMMENDATION */}
           <div className="recommendation-section">
-            <h4 className="rec-title">EVIDENCE-BASED RECOMMENDATION</h4>
-            <p className="rec-text">{result.recommendation}</p>
+            <h4 className="rec-title">
+              EVIDENCE-BASED RECOMMENDATION
+            </h4>
+
+            <p className="rec-text">
+              {result.recommendation}
+            </p>
           </div>
 
-          {/* BEST AVAILABLE TIME SUGGESTION (Requirement 15) */}
+          {/* BEST AVAILABLE TIME SUGGESTION */}
           {result.alternativeTimeWindow && (
             <div className="best-time-suggestion-box">
               <div className="best-time-title">
-                <TrendingDown size={16} className="icon-emerald" />
-                <span>BEST AVAILABLE TIME SUGGESTION</span>
+                <TrendingDown
+                  size={16}
+                  className="icon-emerald"
+                />
+
+                <span>
+                  BEST AVAILABLE TIME SUGGESTION
+                </span>
               </div>
+
               <p className="best-time-desc">
-                Alternative Window: <strong>{result.alternativeTimeWindow.timeRange}</strong> (Risk: <strong>{result.alternativeTimeWindow.riskScore}/100</strong> – {result.alternativeTimeWindow.riskLevel})
+                Alternative Window:{' '}
+                <strong>
+                  {result.alternativeTimeWindow.timeRange}
+                </strong>{' '}
+                (Risk:{' '}
+                <strong>
+                  {result.alternativeTimeWindow.riskScore}/100
+                </strong>{' '}
+                – {result.alternativeTimeWindow.riskLevel})
               </p>
-              <p className="best-time-sub">{result.alternativeTimeWindow.explanation}</p>
+
+              <p className="best-time-sub">
+                {result.alternativeTimeWindow.explanation}
+              </p>
             </div>
           )}
         </div>
