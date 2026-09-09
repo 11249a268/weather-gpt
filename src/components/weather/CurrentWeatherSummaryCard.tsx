@@ -172,46 +172,7 @@ export const CurrentWeatherSummaryCard: React.FC<CurrentWeatherSummaryCardProps>
         </div>
       </div>
 
-      {/* Weather Status Banner — always rendered: GREEN (normal) or YELLOW/ORANGE/RED (warning) */}
-      {alertContext && (() => {
-        if (activeAlert) {
-          // Non-GREEN active warning
-          return (
-            <div className={`summary-active-warning-banner severity-${activeAlert.severity.toLowerCase()}`}>
-              <ShieldAlert size={20} className="icon-amber" style={{ flexShrink: 0 }} />
-              <div className="warning-banner-body">
-                <div className="warning-banner-title-row">
-                  <span className="warning-kicker">⚠️ ACTIVE WEATHER WARNING ({activeAlert.severity})</span>
-                  <span className="warning-valid-time">Valid: {activeAlert.validFrom} – {activeAlert.validUntil}</span>
-                </div>
-                <p className="warning-banner-title">{activeAlert.title}</p>
-                <p className="warning-banner-action">
-                  <strong>Recommendation:</strong> {activeAlert.recommendedAction}
-                </p>
-              </div>
-            </div>
-          );
-        }
-        // GREEN — normal conditions, no active warning
-        const greenAlert = alertContext.activeAlerts[0];
-        return (
-          <div className="summary-active-warning-banner severity-green">
-            <ShieldAlert size={20} style={{ flexShrink: 0, color: '#16a34a' }} />
-            <div className="warning-banner-body">
-              <div className="warning-banner-title-row">
-                <span className="warning-kicker" style={{ color: '#15803d' }}>🟢 WEATHER STATUS (GREEN)</span>
-                <span className="warning-valid-time">Evaluated: {greenAlert?.validFrom || alertContext.retrievedAt}</span>
-              </div>
-              <p className="warning-banner-title" style={{ color: '#14532d' }}>
-                {greenAlert?.title || 'GREEN STATUS: No Severe Weather Warning'}
-              </p>
-              <p className="warning-banner-action" style={{ color: '#166534' }}>
-                {greenAlert?.description || 'No significant weather hazard detected for this location. Conditions appear normal.'}
-              </p>
-            </div>
-          </div>
-        );
-      })()}
+      
 
       {/* Footer Bar: Timestamp & Action Buttons */}
       <div className="summary-footer-bar">
