@@ -114,17 +114,28 @@ export function mergeQueryContext(parsed: ParsedQuery): {
     }
   }
 
-  // Activity merge
-  let activity = parsed.activity;
+   // Activity merge
+  // IMPORTANT:
+  // Never reuse the previous activity for a completely new question.
+  // Previous activity is used only when the user clearly asks a follow-up.
+  let activity = parsed.activity || '';
   let customActivityText = parsed.customActivityText;
 
-  if (!activity && sessionState.lastActivity) {
-    activity = sessionState.lastActivity;
+  const isActivityFollowUp =
+    !parsed.activity &&
+    !!sessionState.lastActivity &&
+    (
+      lower.includes('what about') ||
+      lower.includes('how about') ||
+      lower.includes('instead') ||
+      lower.includes('same activity') ||
+      lower.includes('that activity')
+    );
+
+  if (isActivityFollowUp) {
+    activity = sessionState.lastActivity || '';
     customActivityText = sessionState.lastCustomActivityText;
     isFollowUp = true;
-  }
-  if (!activity) {
-    activity = 'cricket';
   }
 
   // Date merge
