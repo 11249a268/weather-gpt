@@ -29,38 +29,7 @@ export async function processWeatherQuery(
   // 2. Natural Language Query Understanding
   const parsed: ParsedQuery = parseUserQuery(normalizedQueryText);
 
-  // 3. Handle Unknown Questions
-  if (parsed.intent === 'UNKNOWN' && !parsed.activity) {
-    const defaultLoc = currentLocation || getConversationState().activeLocation;
-    const weatherCtx = await getWeatherContext(defaultLoc, 'GENERAL_WEATHER', 'Today');
-    const rawUnknownText = "I can help you with current weather, hourly forecasts, weather warnings, travel decisions, outdoor sports, climate intelligence, and historical weather trends. Could you rephrase your question?";
-    const translatedUnknown = await translateExplanationText(rawUnknownText, targetLang);
-
-    return {
-      id: `resp-${Date.now()}`,
-      query: userQueryText,
-      intent: 'UNKNOWN',
-      title: 'WeatherGPT Query Understanding',
-      explanationText: translatedUnknown,
-      weatherContext: weatherCtx,
-      sources: {
-        weatherProvider: weatherCtx.provider,
-        weatherTimestamp: weatherCtx.retrievedAt,
-        alertProvider: 'N/A',
-        alertTimestamp: 'N/A'
-      },
-      followUpSuggestions: [
-        'Was this month hotter than usual?',
-        'Can I play cricket tomorrow evening?',
-        'Compare Chennai and Bengaluru historically'
-      ],
-      debugInfo: {
-        parsedQuery: parsed,
-        locationName: defaultLoc.name,
-        explanationSource: `Grounded LLM Engine (${targetLang.toUpperCase()})`
-      }
-    };
-  }
+  
 
   // 4. Resolve Target Location & Secondary Location
   let targetLocation = currentLocation || getConversationState().activeLocation;
