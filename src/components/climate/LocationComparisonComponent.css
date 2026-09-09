@@ -1,0 +1,116 @@
+.dual-location-wrapper {
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-card);
+}
+
+.dual-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.dual-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.3rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dual-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.dual-summary-banner {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #065f46;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.side-by-side-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.city-card {
+  padding: 1.2rem;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+}
+
+.city-card.primary {
+  border-color: var(--border-glow);
+  background: #eff6ff;
+}
+
+.city-card.secondary {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+}
+
+.city-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+}
+
+.city-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.city-baseline {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.vs-divider {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  background: #f3f4f6;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .side-by-side-grid {
+    grid-template-columns: 1fr;
+  }
+  .vs-divider {
+    margin: 0 auto;
+  }
+}

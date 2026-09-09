@@ -1,0 +1,123 @@
+.daily-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.daily-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 2fr 1fr 1fr;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(10, 15, 26, 0.5);
+  border: 1px solid var(--border-light);
+  padding: 0.75rem 1.1rem;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.daily-row:hover {
+  background: rgba(26, 35, 54, 0.6);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 900px) {
+  .daily-row {
+    grid-template-columns: 1.5fr 2fr 1.5fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .daily-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding: 0.85rem;
+  }
+
+  .day-info {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.35rem;
+  }
+
+  .temp-range {
+    justify-content: flex-start;
+  }
+}
+
+.day-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.day-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.day-date {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.condition-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.condition-text {
+  font-size: 0.88rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.rain-bar-container {
+  position: relative;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.rain-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+  border-radius: 9999px;
+  opacity: 0.7;
+}
+
+.rain-pct-text {
+  position: absolute;
+  left: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.temp-range {
+  display: flex;
+  gap: 0.6rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.temp-high {
+  color: #ffffff;
+}
+
+.temp-low {
+  color: var(--text-muted);
+}

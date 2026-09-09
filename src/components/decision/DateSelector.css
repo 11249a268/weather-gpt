@@ -1,0 +1,62 @@
+.date-selector-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.date-tabs-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.date-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-tab-btn:hover {
+  color: var(--text-main);
+  background: #f9fafb;
+}
+
+.date-tab-btn.active {
+  background: #eff6ff;
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.custom-date-picker-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+}
+
+.date-picker-input {
+  max-width: 240px;
+}
+
+.date-validation-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

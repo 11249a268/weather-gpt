@@ -1,0 +1,246 @@
+.chat-container-card {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 180px);
+  min-height: 580px;
+  max-height: 880px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0 !important;
+  border: 1px solid var(--border-light);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.chat-main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+  background: #ffffff;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-bot-badge {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #eff6ff;
+  border: 1px solid var(--border-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-sparkle {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  color: var(--accent-violet);
+}
+
+.header-main-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.header-main-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.live-weather-context-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1.5rem;
+  background: #eff6ff;
+  border-bottom: 1px solid #bfdbfe;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.location-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-main);
+}
+
+.btn-refresh-weather {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  color: var(--accent-cyan);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh-weather:hover {
+  background: #eff6ff;
+  border-color: var(--border-glow);
+  color: var(--accent-cyan);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+.refresh-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 0.4rem 1.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-bottom: 1px solid #a7f3d0;
+}
+
+.btn-clear-session {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.chat-feed-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 600px) {
+  .chat-feed-area {
+    padding: 1rem 0.85rem;
+  }
+}
+
+.chat-loading-row, .chat-error-row {
+  margin: 1rem 0;
+}
+
+.chat-input-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-light);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .chat-input-footer {
+    padding: 0.85rem;
+  }
+}
+
+.chat-console-form {
+  width: 100%;
+}
+
+.console-input-with-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.console-field {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  font-size: 0.95rem;
+}
+
+.console-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-mic-console {
+  background: #f9fafb;
+  border: 1px solid var(--border-light);
+  color: var(--accent-cyan);
+  width: 44px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-mic-console:hover {
+  background: #eff6ff;
+  border-color: var(--border-glow);
+}
+
+.btn-console-send {
+  height: 48px;
+  padding: 0 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .console-input-with-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .console-field {
+    width: 100%;
+    height: 44px;
+  }
+
+  .console-buttons-row {
+    width: 100%;
+  }
+
+  .btn-mic-console {
+    height: 44px;
+    width: 44px;
+  }
+
+  .btn-console-send {
+    flex: 1;
+    height: 44px;
+  }
+}
+
+.voice-coming-soon-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-align: center;
+}

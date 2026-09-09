@@ -1,0 +1,220 @@
+/* =========================================
+   Location Search Input — Light Theme
+   ========================================= */
+
+.location-search-wrapper {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Row: input + "Use My Location" button */
+.search-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .search-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Input wrapper */
+.search-input-container {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Input — no left padding offset since icon is removed */
+.location-input-field {
+  padding-left: 1rem;
+  padding-right: 2.5rem;
+  height: 48px;
+  font-size: 0.95rem;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  color: #111827;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.location-input-field:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.location-input-field::placeholder {
+  color: #9ca3af;
+}
+
+/* Spinner shown while searching */
+.search-spinner {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #2563eb;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* "Use My Location" button */
+.btn-my-location {
+  height: 48px;
+  padding: 0 1.25rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* =========================================
+   Autocomplete Dropdown — Light Theme
+   ========================================= */
+
+.suggestions-dropdown {
+  /* Position directly below the search input */
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  /* Light-theme surface */
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.07),
+    0 10px 24px -4px rgba(0, 0, 0, 0.1);
+
+  /* Scrollable — show up to ~12 items, then scroll */
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Internal layout */
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  /* Prevent clipping by overflow:hidden parents */
+  box-sizing: border-box;
+}
+
+/* Thin scrollbar matching light theme */
+.suggestions-dropdown::-webkit-scrollbar {
+  width: 5px;
+}
+.suggestions-dropdown::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 9999px;
+}
+.suggestions-dropdown::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 9999px;
+}
+.suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* "Select Location" header label */
+.dropdown-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.6rem 0.4rem;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* Individual result row */
+.suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.suggestion-item:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.suggestion-item:active {
+  background: #dbeafe;
+}
+
+/* Map-pin icon */
+.suggestion-icon {
+  flex-shrink: 0;
+  color: #2563eb;
+  margin-top: 2px;
+}
+
+/* Text column */
+.suggestion-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* Primary line: "Kerala, India" or "Kochi, Kerala" */
+.suggestion-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+/* Secondary line: country */
+.suggestion-details {
+  font-size: 0.75rem;
+  color: #4b5563;
+  font-weight: 500;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+/* Hover state — make text pop */
+.suggestion-item:hover .suggestion-name {
+  color: #1d4ed8;
+}
+
+.suggestion-item:hover .suggestion-details {
+  color: #3b82f6;
+}
+
+/* Mobile: ensure dropdown stays in viewport */
+@media (max-width: 640px) {
+  .suggestions-dropdown {
+    max-height: 280px;
+    border-radius: 10px;
+  }
+}
