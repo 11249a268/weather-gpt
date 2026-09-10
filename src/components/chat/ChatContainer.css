@@ -135,13 +135,8 @@
   scrollbar-width: thin;
 }
 
-@media (max-width: 600px) {
-  .chat-feed-area {
-    padding: 1rem 0.85rem;
-  }
-}
-
-.chat-loading-row, .chat-error-row {
+.chat-loading-row,
+.chat-error-row {
   margin: 1rem 0;
 }
 
@@ -152,12 +147,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-@media (max-width: 600px) {
-  .chat-input-footer {
-    padding: 0.85rem;
-  }
 }
 
 .chat-console-form {
@@ -209,32 +198,6 @@
   padding: 0 1.25rem;
 }
 
-@media (max-width: 600px) {
-  .console-input-with-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .console-field {
-    width: 100%;
-    height: 44px;
-  }
-
-  .console-buttons-row {
-    width: 100%;
-  }
-
-  .btn-mic-console {
-    height: 44px;
-    width: 44px;
-  }
-
-  .btn-console-send {
-    flex: 1;
-    height: 44px;
-  }
-}
-
 .voice-coming-soon-banner {
   display: flex;
   align-items: center;
@@ -243,4 +206,159 @@
   font-size: 0.72rem;
   color: var(--text-dim);
   text-align: center;
+}
+
+/* =========================================================
+   MOBILE RESPONSIVE FIX
+   ========================================================= */
+
+@media (max-width: 640px) {
+  /*
+   * Do not force the chat to be 580px+ tall on phones.
+   * Let the page grow naturally so the answer remains visible.
+   */
+  .chat-container-card {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /*
+   * Keep "Ask WeatherGPT" clearly visible at the top.
+   */
+  .chat-main-header {
+    padding: 0.75rem 0.85rem;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.65rem;
+    flex-wrap: nowrap;
+  }
+
+  .header-left-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .header-bot-badge {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 10px;
+  }
+
+  .header-bot-badge svg:first-child {
+    width: 19px;
+    height: 19px;
+  }
+
+  .header-main-title {
+    font-size: 1.08rem;
+    line-height: 1.15;
+  }
+
+  .header-main-subtitle {
+    font-size: 0.68rem;
+    line-height: 1.25;
+    margin-top: 0.12rem;
+  }
+
+  /*
+   * Language + Sources stay together below the title.
+   */
+  .header-actions-group {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.45rem !important;
+    flex-wrap: wrap;
+  }
+
+  .lang-indicator-pill {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.72rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .header-actions-group .btn {
+    flex-shrink: 0;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  /*
+   * Live weather location bar becomes compact.
+   */
+  .live-weather-context-bar {
+    padding: 0.45rem 0.75rem;
+    gap: 0.45rem;
+  }
+
+  .location-indicator {
+    flex: 1 1 100%;
+    font-size: 0.74rem;
+    line-height: 1.3;
+    align-items: flex-start;
+  }
+
+  .btn-refresh-weather {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.55rem;
+  }
+
+  /*
+   * Give the actual answer area more natural space.
+   */
+  .chat-feed-area {
+    padding: 0.75rem;
+    min-height: 280px;
+    overflow-y: visible;
+  }
+
+  /*
+   * Compact input area.
+   */
+  .chat-input-footer {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .console-input-with-actions {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .console-field {
+    width: auto;
+    height: 44px;
+    font-size: 0.86rem;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .console-buttons-row {
+    width: auto;
+    gap: 0.4rem;
+  }
+
+  .btn-mic-console {
+    width: 42px;
+    height: 44px;
+    min-width: 42px;
+  }
+
+  .btn-console-send {
+    flex: 0 0 auto;
+    height: 44px;
+    padding: 0 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .voice-coming-soon-banner {
+    font-size: 0.62rem;
+    line-height: 1.25;
+  }
 }
