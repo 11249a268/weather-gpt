@@ -29,8 +29,6 @@ export async function processWeatherQuery(
   // 2. Natural Language Query Understanding
   const parsed: ParsedQuery = parseUserQuery(normalizedQueryText);
 
-  
-
   // 4. Resolve Target Location & Secondary Location
   let targetLocation = currentLocation || getConversationState().activeLocation;
   let secondaryLocation: LocationSearchResult | undefined = undefined;
@@ -64,7 +62,10 @@ export async function processWeatherQuery(
   // 6. Handle Clarification Requests
   if (parsed.requiresClarification && parsed.clarificationPrompt) {
     const weatherCtx = await getWeatherContext(targetLocation, 'GENERAL_WEATHER', 'Today');
-    const translatedClarification = await translateExplanationText(parsed.clarificationPrompt, targetLang);
+    const translatedClarification = await translateExplanationText(
+      parsed.clarificationPrompt,
+      targetLang
+    );
 
     return {
       id: `resp-${Date.now()}`,
@@ -92,14 +93,22 @@ export async function processWeatherQuery(
     };
   }
 
-  // 7. Handle Climate & Historical Intelligence Questions (Requirement 19, 21, 22, 23, 24, 27, 28)
+  // 7. Handle Climate & Historical Intelligence Questions
   if (parsed.intent === 'CLIMATE_QUESTION') {
-    const weatherCtx = await getWeatherContext(targetLocation, 'GENERAL_WEATHER', 'Today');
+    const weatherCtx = await getWeatherContext(
+      targetLocation,
+      'GENERAL_WEATHER',
+      'Today'
+    );
 
-    // Dual Location Comparison ("Compare Chennai and Bengaluru weather history")
+    // Dual Location Comparison
     if (secondaryLocation || (parsed.secondaryLocationReference && secondaryLocation)) {
-      const compRes = await getHistoricalComparison(targetLocation, secondaryLocation!, '30days');
-      
+      const compRes = await getHistoricalComparison(
+        targetLocation,
+        secondaryLocation!,
+        '30days'
+      );
+
       const climateResult: ClimateGPTResult = {
         locationName: targetLocation.name,
         secondaryLocationName: secondaryLocation!.name,
@@ -107,16 +116,27 @@ export async function processWeatherQuery(
         metricLabel: 'Historical Comparison',
         currentValue: `${compRes.dataA.currentAvgTemp ?? 'N/A'}°C (${targetLocation.name})`,
         baselineValue: `${compRes.dataB.currentAvgTemp ?? 'N/A'}°C (${secondaryLocation!.name})`,
-        differenceValue: compRes.dataA.currentAvgTemp && compRes.dataB.currentAvgTemp
-          ? `${(compRes.dataA.currentAvgTemp - compRes.dataB.currentAvgTemp).toFixed(1)}°C`
-          : 'N/A',
+        differenceValue:
+          compRes.dataA.currentAvgTemp && compRes.dataB.currentAvgTemp
+            ? `${(
+                compRes.dataA.currentAvgTemp -
+                compRes.dataB.currentAvgTemp
+              ).toFixed(1)}°C`
+            : 'N/A',
         insightSummary: compRes.summary,
         dataSource: compRes.dataSource
       };
 
-      const rawExplanation = `Based on historical climate data, in **${targetLocation.name}** the 30-day average temperature was **${compRes.dataA.currentAvgTemp ?? 'N/A'}°C** with **${compRes.dataA.currentTotalRain ?? 'N/A'} mm** rainfall. In **${secondaryLocation!.name}**, the 30-day average temperature was **${compRes.dataB.currentAvgTemp ?? 'N/A'}°C** with **${compRes.dataB.currentTotalRain ?? 'N/A'} mm** rainfall.\n\n${compRes.summary}\n\n*Note: Historical comparisons describe observed weather patterns in the available data. They do not by themselves establish the cause of long-term climate change.*`;
+      const rawExplanation = `Based on historical climate data, in **${targetLocation.name}** the 30-day average temperature was **${compRes.dataA.currentAvgTemp ?? 'N/A'}°C** with **${compRes.dataA.currentTotalRain ?? 'N/A'} mm** rainfall. In **${secondaryLocation!.name}**, the 30-day average temperature was **${compRes.dataB.currentAvgTemp ?? 'N/A'}°C** with **${compRes.dataB.currentTotalRain ?? 'N/A'} mm** rainfall.
 
-      const translatedExplanation = await translateExplanationText(rawExplanation, targetLang);
+${compRes.summary}
+
+*Note: Historical comparisons describe observed weather patterns in the available data. They do not by themselves establish the cause of long-term climate change.*`;
+
+      const translatedExplanation = await translateExplanationText(
+        rawExplanation,
+        targetLang
+      );
 
       return {
         id: `resp-${Date.now()}`,
@@ -146,33 +166,55 @@ export async function processWeatherQuery(
     }
 
     // Single Location Historical Query
-    const range = mergedContext.climateDateRange === '7_DAYS' ? '7days' :
-                  mergedContext.climateDateRange === '3_MONTHS' ? '3months' :
-                  mergedContext.climateDateRange === 'PAST_YEAR' || mergedContext.climateDateRange === '1_YEAR' ? '1year' :
-                  mergedContext.climateDateRange === 'MULTIPLE_YEARS' ? '3years' : '30days';
+    const range =
+      mergedContext.climateDateRange === '7_DAYS'
+        ? '7days'
+        : mergedContext.climateDateRange === '3_MONTHS'
+        ? '3months'
+        : mergedContext.climateDateRange === 'PAST_YEAR' ||
+          mergedContext.climateDateRange === '1_YEAR'
+        ? '1year'
+        : mergedContext.climateDateRange === 'MULTIPLE_YEARS'
+        ? '3years'
+        : '30days';
 
-    const historicalData = await fetchHistoricalClimateData(targetLocation, range);
+    const historicalData = await fetchHistoricalClimateData(
+      targetLocation,
+      range
+    );
 
     let metricLabel = 'Temperature';
     let currentValue = `${historicalData.currentAvgTemp ?? 'N/A'}°C`;
     let baselineValue = `${historicalData.baselineAvgTemp ?? 'N/A'}°C`;
-    let differenceValue = historicalData.tempDiff !== null ? `${historicalData.tempDiff >= 0 ? '+' : ''}${historicalData.tempDiff}°C` : 'N/A';
+    let differenceValue =
+      historicalData.tempDiff !== null
+        ? `${historicalData.tempDiff >= 0 ? '+' : ''}${historicalData.tempDiff}°C`
+        : 'N/A';
     let insightText = historicalData.tempDiffLabel;
 
     if (mergedContext.climateMetric === 'RAINFALL') {
       metricLabel = 'Accumulated Rainfall';
       currentValue = `${historicalData.currentTotalRain ?? 'N/A'} mm`;
       baselineValue = `${historicalData.baselineTotalRain ?? 'N/A'} mm`;
-      differenceValue = historicalData.rainDiff !== null ? `${historicalData.rainDiff >= 0 ? '+' : ''}${historicalData.rainDiff} mm` : 'N/A';
+      differenceValue =
+        historicalData.rainDiff !== null
+          ? `${historicalData.rainDiff >= 0 ? '+' : ''}${historicalData.rainDiff} mm`
+          : 'N/A';
       insightText = historicalData.rainDiffLabel;
     } else if (mergedContext.climateMetric === 'HUMIDITY') {
       metricLabel = 'Average Relative Humidity';
       currentValue = `${historicalData.currentAvgHumidity ?? 'N/A'}%`;
       baselineValue = `${historicalData.baselineAvgHumidity ?? 'N/A'}%`;
-      differenceValue = historicalData.humidityDiff !== null ? `${historicalData.humidityDiff >= 0 ? '+' : ''}${historicalData.humidityDiff}%` : 'N/A';
-      insightText = historicalData.humidityDiff !== null
-        ? (historicalData.humidityDiff >= 0 ? `+${historicalData.humidityDiff}% above baseline` : `${historicalData.humidityDiff}% below baseline`)
-        : 'Humidity baseline unavailable';
+      differenceValue =
+        historicalData.humidityDiff !== null
+          ? `${historicalData.humidityDiff >= 0 ? '+' : ''}${historicalData.humidityDiff}%`
+          : 'N/A';
+      insightText =
+        historicalData.humidityDiff !== null
+          ? historicalData.humidityDiff >= 0
+            ? `+${historicalData.humidityDiff}% above baseline`
+            : `${historicalData.humidityDiff}% below baseline`
+          : 'Humidity baseline unavailable';
     }
 
     const climateResult: ClimateGPTResult = {
@@ -187,15 +229,29 @@ export async function processWeatherQuery(
     };
 
     let rawExplanation = '';
+
     if (!historicalData.isAvailable) {
       rawExplanation = `Historical weather data is not available from the current data provider for **${targetLocation.name}** during this period. Current weather and forecast features remain fully functional.`;
     } else if (mergedContext.climateMetric === 'RAINFALL') {
-      rawExplanation = `Based on historical climate records for **${targetLocation.name}**, accumulated rainfall over the selected period (${historicalData.periodLabel}) was **${currentValue}**. The historical baseline average for this period is **${baselineValue}** (Difference: **${differenceValue}**).\n\n${insightText}.\n\n*Note: Historical comparisons describe observed weather patterns in the available data. They do not by themselves establish the cause of long-term climate change.*`;
+      rawExplanation = `Based on historical climate records for **${targetLocation.name}**, accumulated rainfall over the selected period (${historicalData.periodLabel}) was **${currentValue}**. The historical baseline average for this period is **${baselineValue}** (Difference: **${differenceValue}**).
+
+${insightText}.
+
+*Note: Historical comparisons describe observed weather patterns in the available data. They do not by themselves establish the cause of long-term climate change.*`;
     } else {
-      rawExplanation = `Based on historical climate records for **${targetLocation.name}**, the average temperature over the selected period (${historicalData.periodLabel}) was **${currentValue}**. The historical 3-year baseline average for this period is **${baselineValue}** (Difference: **${differenceValue}**).\n\n${insightText}.\n\n*Educational Distinction: Weather describes short-term daily conditions (e.g. tomorrow's rain), whereas Climate describes long-term historical averages.*\n\n*Disclaimer: Historical comparisons describe observed weather patterns in the available data. They do not by themselves establish the cause of long-term climate change.*`;
+      rawExplanation = `Based on historical climate records for **${targetLocation.name}**, the average temperature over the selected period (${historicalData.periodLabel}) was **${currentValue}**. The historical 3-year baseline average for this period is **${baselineValue}** (Difference: **${differenceValue}**).
+
+${insightText}.
+
+*Educational Distinction: Weather describes short-term daily conditions (e.g. tomorrow's rain), whereas Climate describes long-term historical averages.*
+
+*Disclaimer: Historical comparisons describe observed weather patterns in the available data. They do not by themselves establish the cause of long-term climate change.*`;
     }
 
-    const translatedExplanation = await translateExplanationText(rawExplanation, targetLang);
+    const translatedExplanation = await translateExplanationText(
+      rawExplanation,
+      targetLang
+    );
 
     return {
       id: `resp-${Date.now()}`,
@@ -225,21 +281,53 @@ export async function processWeatherQuery(
   }
 
   // 8. Fetch Telemetry & Execute Downstream Services
-  let weatherCtx: WeatherContext = await getWeatherContext(targetLocation, parsed.intent as any, mergedContext.dateStr);
+  let weatherCtx: WeatherContext = await getWeatherContext(
+    targetLocation,
+    parsed.intent as any,
+    mergedContext.dateStr
+  );
+
   let alertCtx: AlertContext | undefined = undefined;
   let decisionResult: DecisionResult | undefined = undefined;
 
   if (parsed.requiresAlerts) {
     alertCtx = await getAlertsForLocation(targetLocation);
   }
-const shouldRunDecision =
-  parsed.requiresDecision ||
-  parsed.extractedEntities.hasExplicitActivity;
 
-  if (shouldRunDecision) {
+  /*
+   * Run the Risk Analyzer ONLY when:
+   *
+   * 1. The CURRENT question explicitly contains an activity
+   *    such as cricket, running, cycling, hiking, driving, etc.
+   *
+   * 2. OR the user is genuinely following up on a previous
+   *    activity question, such as:
+   *
+   *       "Can I play cricket?"
+   *       "What about evening?"
+   *
+   * Generic questions such as:
+   *
+   *       "Can I go outside now?"
+   *       "Can I go to Chennai now?"
+   *       "Can I go to Melbourne?"
+   *
+   * must NOT enter the Risk Analyzer.
+   *
+   * This prevents undefined/100 risk responses.
+   */
+  const shouldRunDecision =
+    parsed.extractedEntities.hasExplicitActivity ||
+    (
+      mergedContext.isFollowUp &&
+      !!mergedContext.activity
+    );
+
+  if (shouldRunDecision && mergedContext.activity) {
     if (!alertCtx) {
       alertCtx = await getAlertsForLocation(targetLocation);
     }
+
     decisionResult = await analyzeWeatherDecision(
       mergedContext.activity,
       targetLocation,
@@ -257,7 +345,10 @@ const shouldRunDecision =
   );
 
   // 10. Requirement 16, 17 & 18: Response Translation into Target Language
-  const translatedExplanation = await translateExplanationText(baseResponse.explanationText, targetLang);
+  const translatedExplanation = await translateExplanationText(
+    baseResponse.explanationText,
+    targetLang
+  );
 
   return {
     ...baseResponse,
@@ -268,4 +359,3 @@ const shouldRunDecision =
     }
   };
 }
-
