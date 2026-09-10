@@ -1,19 +1,39 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Mic, Send, Sparkles, RefreshCw, AlertCircle, MapPin, CheckCircle, Trash2, Database } from 'lucide-react';
+import {
+  Bot,
+  Mic,
+  Send,
+  Sparkles,
+  RefreshCw,
+  AlertCircle,
+  MapPin,
+  CheckCircle,
+  Trash2,
+  Database
+} from 'lucide-react';
+
 import { processWeatherQuery } from '../../services/weatherPipelineService';
-import { fetchWeatherForLocation, getActiveWeatherContext } from '../../services/weatherService';
+import {
+  fetchWeatherForLocation,
+  getActiveWeatherContext
+} from '../../services/weatherService';
 import { clearConversationState } from '../../services/conversationContextService';
+
 import { ChatMessage, MessageItem } from './ChatMessage';
 import { SampleQuestionsGrid } from './SampleQuestionsGrid';
 import { DebugPanel } from './DebugPanel';
 import { LoadingState } from '../ui/LoadingState';
 import { ErrorState } from '../ui/ErrorState';
+
 import { LocationSearchResult } from '../../services/weatherProviders/openMeteoProvider';
 import { WeatherGPTResponse } from '../../services/explanationService';
+
 import { useLanguage } from '../../context/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '../../config/languageConfig';
-import { VoiceInputButton, VoiceSpeakerButton } from './VoiceControls';
+
+import { VoiceInputButton } from './VoiceControls';
 import { DataSourcesModal } from '../common/DataSourcesModal';
+
 import './ChatContainer.css';
 
 import { MultilingualVoiceBar } from './MultilingualVoiceBar';
@@ -41,8 +61,11 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   // Active Location State
   const [activeLoc, setActiveLoc] = useState<LocationSearchResult>(() => {
     if (currentLocation) return currentLocation;
+
     const activeCtx = getActiveWeatherContext();
+
     if (activeCtx) return activeCtx.location;
+
     return {
       id: 1,
       name: 'Chennai',
@@ -64,7 +87,9 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
   };
 
   useEffect(() => {
@@ -73,9 +98,11 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
   const handleSendMessage = async (textToSend?: string) => {
     const queryText = textToSend || inputQuery;
+
     if (!queryText || !queryText.trim() || loading) return;
 
     const userText = queryText.trim();
+
     setInputQuery('');
     setError(null);
     setRefreshNotice(null);
@@ -84,14 +111,21 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       id: `usr-${Date.now()}`,
       sender: 'user',
       text: userText,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
     try {
-      const pipelineRes: WeatherGPTResponse = await processWeatherQuery(userText, activeLoc, currentLanguage);
+      const pipelineRes: WeatherGPTResponse = await processWeatherQuery(
+        userText,
+        activeLoc,
+        currentLanguage
+      );
 
       const botMsg: MessageItem = {
         id: `bot-${Date.now()}`,
@@ -100,22 +134,29 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         weatherGPTResponse: pipelineRes,
         structuredResponse: undefined,
         followUpSuggestions: pipelineRes.followUpSuggestions,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
       };
 
       setMessages((prev) => [...prev, botMsg]);
 
-      // Auto-Speak if enabled (Requirement: Default OFF, auto-speaks when ON)
+      // Auto-Speak if enabled
       if (autoSpeak && pipelineRes.explanationText) {
         textToSpeechService.speak(
-  pipelineRes.explanationText,
-  currentLanguage,
-  voiceGender
-);
+          pipelineRes.explanationText,
+          currentLanguage,
+          voiceGender
+        );
       }
     } catch (err: any) {
       console.error('Failed to process weather query:', err);
-      setError(err.message || 'An unexpected error occurred while contacting WeatherGPT.');
+
+      setError(
+        err.message ||
+          'An unexpected error occurred while contacting WeatherGPT.'
+      );
     } finally {
       setLoading(false);
     }
@@ -124,10 +165,18 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   const handleRefreshClick = async () => {
     setLoading(true);
     setError(null);
+
     try {
       await fetchWeatherForLocation(activeLoc);
-      if (onRefreshWeather) onRefreshWeather();
-      setRefreshNotice(`Weather telemetry refetched for ${activeLoc.name}`);
+
+      if (onRefreshWeather) {
+        onRefreshWeather();
+      }
+
+      setRefreshNotice(
+        `Weather telemetry refetched for ${activeLoc.name}`
+      );
+
       setTimeout(() => setRefreshNotice(null), 3500);
     } catch (err: any) {
       setError('Failed to refetch live weather data.');
@@ -150,17 +199,29 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
             <Bot size={22} className="icon-cyan" />
             <Sparkles size={12} className="header-sparkle" />
           </div>
+
           <div>
-            <h2 className="header-main-title">Ask WeatherGPT</h2>
+            <h2 className="header-main-title">
+              Ask WeatherGPT
+            </h2>
+
             <p className="header-main-subtitle">
               Weather-Aware AI Decision Assistant • Empirical Open-Meteo Analysis
             </p>
           </div>
         </div>
 
-        <div className="header-actions-group" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <div
+          className="header-actions-group"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem'
+          }}
+        >
           <span className="lang-indicator-pill">
-            🌐 Language: {activeLangConfig.nativeName} ({activeLangConfig.displayName})
+            🌐 Language: {activeLangConfig.nativeName} (
+            {activeLangConfig.displayName})
           </span>
 
           <button
@@ -174,9 +235,15 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           </button>
 
           {messages.length > 0 && (
-            <button className="btn btn-secondary btn-clear-session" onClick={handleClearHistory} title="Clear current chat session">
+            <button
+              className="btn btn-secondary btn-clear-session"
+              onClick={handleClearHistory}
+              title="Clear current chat session"
+            >
               <RefreshCw size={14} />
-              <span>{t('newSession', 'New Session')}</span>
+              <span>
+                {t('newSession', 'New Session')}
+              </span>
             </button>
           )}
         </div>
@@ -185,10 +252,15 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       <div className="live-weather-context-bar">
         <div className="location-indicator">
           <MapPin size={15} className="icon-cyan" />
+
           <span>
             {getActiveWeatherContext()?.isCached
-              ? `Showing recently cached weather data for: 📍 ${activeLoc.name}${activeLoc.admin1 ? `, ${activeLoc.admin1}` : ''}`
-              : `Using live weather data for: 📍 ${activeLoc.name}${activeLoc.admin1 ? `, ${activeLoc.admin1}` : ''}`}
+              ? `Showing recently cached weather data for: 📍 ${activeLoc.name}${
+                  activeLoc.admin1 ? `, ${activeLoc.admin1}` : ''
+                }`
+              : `Using live weather data for: 📍 ${activeLoc.name}${
+                  activeLoc.admin1 ? `, ${activeLoc.admin1}` : ''
+                }`}
           </span>
         </div>
 
@@ -199,13 +271,26 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           disabled={loading}
           title="Refetch latest telemetry from Open-Meteo"
         >
-          <RefreshCw size={13} className={loading ? 'spinning' : ''} />
-          <span>{t('refreshWeather', 'Refresh Weather')}</span>
+          <RefreshCw
+            size={13}
+            className={loading ? 'spinning' : ''}
+          />
+
+          <span>
+            {t('refreshWeather', 'Refresh Weather')}
+          </span>
         </button>
       </div>
 
       {/* Multilingual AI Voice Controls Bar */}
-      <MultilingualVoiceBar lastResponseText={[...messages].reverse().find((m) => m.sender === 'bot')?.text} />
+      {/* KEEP THIS - this is the TOP Listen button */}
+      <MultilingualVoiceBar
+        lastResponseText={
+          [...messages]
+            .reverse()
+            .find((m) => m.sender === 'bot')?.text
+        }
+      />
 
       {refreshNotice && (
         <div className="refresh-notice-banner">
@@ -216,7 +301,9 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
       <div className="chat-feed-area">
         {messages.length === 0 ? (
-          <SampleQuestionsGrid onSelectQuestion={(q) => handleSendMessage(q)} />
+          <SampleQuestionsGrid
+            onSelectQuestion={(q) => handleSendMessage(q)}
+          />
         ) : (
           messages.map((msg) => (
             <React.Fragment key={msg.id}>
@@ -225,23 +312,23 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                   message={msg}
                   onSelectFollowUp={(q) => handleSendMessage(q)}
                 />
-                {msg.sender === 'bot' && (
-                  <div className="msg-tts-action-row" style={{ marginLeft: '3rem', marginTop: '0.3rem' }}>
-                    <VoiceSpeakerButton textToRead={msg.text || ''} />
-                  </div>
-                )}
               </div>
 
-              {msg.sender === 'bot' && msg.structuredResponse?.debugInfo && (
-                <DebugPanel debugInfo={msg.structuredResponse.debugInfo} />
-              )}
+              {msg.sender === 'bot' &&
+                msg.structuredResponse?.debugInfo && (
+                  <DebugPanel
+                    debugInfo={msg.structuredResponse.debugInfo}
+                  />
+                )}
             </React.Fragment>
           ))
         )}
 
         {loading && (
           <div className="chat-loading-row">
-            <LoadingState message={`WeatherGPT is checking the latest weather for ${activeLoc.name}...`} />
+            <LoadingState
+              message={`WeatherGPT is checking the latest weather for ${activeLoc.name}...`}
+            />
           </div>
         )}
 
@@ -279,17 +366,23 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
             <div className="console-buttons-row">
               <VoiceInputButton
-                onTranscriptConfirmed={(text) => handleSendMessage(text)}
+                onTranscriptConfirmed={(text) =>
+                  handleSendMessage(text)
+                }
                 disabled={loading}
               />
 
               <button
                 type="submit"
                 className="btn btn-primary btn-console-send"
-                disabled={loading || !inputQuery.trim()}
+                disabled={
+                  loading || !inputQuery.trim()
+                }
               >
                 <Send size={16} />
-                <span className="btn-send-label">Send</span>
+                <span className="btn-send-label">
+                  Send
+                </span>
               </button>
             </div>
           </div>
@@ -297,11 +390,17 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
         <div className="voice-coming-soon-banner">
           <AlertCircle size={12} className="icon-cyan" />
-          <span>Multilingual Voice STT/TTS Active • Open-Meteo &amp; IMD Telemetry Grounded</span>
+
+          <span>
+            Multilingual Voice STT/TTS Active • Open-Meteo &amp; IMD Telemetry Grounded
+          </span>
         </div>
       </div>
 
-      <DataSourcesModal isOpen={showDataSources} onClose={() => setShowDataSources(false)} />
+      <DataSourcesModal
+        isOpen={showDataSources}
+        onClose={() => setShowDataSources(false)}
+      />
     </div>
   );
 };
