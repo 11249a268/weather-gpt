@@ -1,9 +1,9 @@
 .chat-container-card {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 180px);
-  min-height: 580px;
-  max-height: 880px;
+  height: calc(100vh - 120px);
+  min-height: 680px;
+  max-height: 1000px;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
